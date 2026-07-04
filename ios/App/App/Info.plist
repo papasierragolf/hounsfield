@@ -24,6 +24,14 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!--
+	  Export-compliance: the only encryption in the app is AES-GCM used to
+	  protect the user's own data at rest on-device (see BiometricVaultPlugin
+	  and lib/crypto.js). That use qualifies for the standard exemption, so we
+	  declare it here to skip the manual questionnaire on every upload.
+	-->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSCameraUsageDescription</key>
 	<string>Hounsfield uses the camera to photograph X-ray films and CT images for on-device interpretation. Photos never leave your device.</string>
 	<key>NSFaceIDUsageDescription</key>
@@ -36,7 +44,7 @@
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>

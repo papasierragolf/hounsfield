@@ -20,6 +20,7 @@
 		A10000000000000000000004 /* HounsfieldViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* HounsfieldViewController.swift */; };
 		A10000000000000000000006 /* MLXHubBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000007 /* MLXHubBridge.swift */; };
 		A10000000000000000000051 /* BiometricVaultPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000050 /* BiometricVaultPlugin.swift */; };
+		A10000000000000000000061 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000060 /* PrivacyInfo.xcprivacy */; };
 		A10000000000000000000021 /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000011 /* MLXVLM */; };
 		A10000000000000000000022 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000012 /* MLXLMCommon */; };
 		A10000000000000000000023 /* MLXHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000013 /* MLXHuggingFace */; };
@@ -44,6 +45,7 @@
 		A10000000000000000000005 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		A10000000000000000000007 /* MLXHubBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLXHubBridge.swift; sourceTree = "<group>"; };
 		A10000000000000000000050 /* BiometricVaultPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricVaultPlugin.swift; sourceTree = "<group>"; };
+		A10000000000000000000060 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -90,6 +92,7 @@
 				A10000000000000000000007 /* MLXHubBridge.swift */,
 				A10000000000000000000050 /* BiometricVaultPlugin.swift */,
 				A10000000000000000000005 /* App.entitlements */,
+				A10000000000000000000060 /* PrivacyInfo.xcprivacy */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
 				504EC3101FED79650016851F /* LaunchScreen.storyboard */,
@@ -178,6 +181,7 @@
 				50B271D11FEDC1A000F3C39B /* public in Resources */,
 				A10000000000000000000041 /* BundledModels in Resources */,
 				504EC30F1FED79650016851F /* Assets.xcassets in Resources */,
+				A10000000000000000000061 /* PrivacyInfo.xcprivacy in Resources */,
 				50379B232058CBB4000EE86E /* capacitor.config.json in Resources */,
 				504EC30D1FED79650016851F /* Main.storyboard in Resources */,
 				2FAD9763203C412B000D30F8 /* config.xml in Resources */,

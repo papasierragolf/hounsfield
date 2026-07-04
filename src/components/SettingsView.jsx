@@ -19,6 +19,10 @@ export default function SettingsView({ modelId, onModelIdChange, onRestored, the
   const [vaultMsg, setVaultMsg] = useState(null);
 
   const biometryLabel = BIOMETRY_LABEL[vault.biometryType] || 'biometric unlock';
+  // Noun used in the "Enable … lock" button — avoids the awkward
+  // "biometric unlock lock" reading when the generic label is in play.
+  const lockNoun =
+    vault.biometryType === 'faceID' ? 'Face ID' : vault.biometryType === 'touchID' ? 'Touch ID' : 'biometric';
   const vaultOn = vault.state === 'unlocked' || vault.state === 'locked' || vault.state === 'unsupported';
 
   async function handleVaultToggle() {
@@ -117,8 +121,8 @@ export default function SettingsView({ modelId, onModelIdChange, onRestored, the
               {vaultBusy
                 ? 'Working…'
                 : vaultOn
-                  ? `Disable ${biometryLabel} lock`
-                  : `Enable ${biometryLabel} lock`}
+                  ? `Disable ${lockNoun} lock`
+                  : `Enable ${lockNoun} lock`}
             </button>
             {vault.state === 'unlocked' && (
               <button
@@ -292,7 +296,7 @@ export default function SettingsView({ modelId, onModelIdChange, onRestored, the
             from the app source, upload the result to your own HF repo, and paste that id
             in the custom field. Full recipe:{' '}
             <a
-              href="https://github.com/anthropics/hounsfield/blob/main/docs/USING_OFFICIAL_MEDGEMMA.md"
+              href="https://github.com/papasierragolf/hounsfield/blob/main/docs/USING_OFFICIAL_MEDGEMMA.md"
               target="_blank"
               rel="noreferrer"
               style={{ color: 'var(--accent)' }}
