@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!--
+  Reusable App Store / social marketing tile template for Hounsfield.
+
+  Served by the same Vite dev server as the app itself (place under
+  public/, so it's reachable at /marketing/store-tile.html) — this matters
+  because the embedded <iframe> below points at the running app on the
+  SAME origin, which lets this page's script reach into the iframe
+  (iframe.contentDocument) to drive it into a specific screen/theme before
+  the screenshot is taken. Cross-origin, that scripting would be blocked
+  by the browser and the iframe would just show whatever the app's
+  default landing screen is.
+
+  Usage: open with query params, e.g.
+    /marketing/store-tile.html?headline=Radiology+AI.&accent=Fully+on+your+device.
+      &sub=MedGemma+1.5+4B+runs+locally+via+Apple+MLX.&bg=light&tab=studies
+
+  Params:
+    headline   plain first line (required)
+    accent     colored second line (optional)
+    sub        subhead paragraph (optional)
+    bg         'light' | 'dark'  — background of the marketing canvas (default light)
+    tab        'studies' | 'settings' | 'study' | 'capture' — which app screen to show
+    ready      '1' to cosmetically show "MedGemma · mlx" as loaded (default off)
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  html, body {
+    margin: 0; padding: 0; width: 1080px; height: 1920px; overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body.bg-light {
+    background: linear-gradient(160deg, #faf9f5 0%, #f3ede2 55%, #f0dcc8 100%);
+  }
+  body.bg-dark {
+    background: linear-gradient(160deg, #2a2825 0%, #262624 55%, #1f1e1d 100%);
+  }
+  .headline {
+    position: absolute; top: 120px; left: 0; width: 100%; text-align: center;
+    font-family: Georgia, 'Times New Roman', serif; font-size: 64px; font-weight: 700;
+    line-height: 1.25; padding: 0 90px; box-sizing: border-box;
+  }
+  .bg-light .headline { color: #1f1e1d; }
+  .bg-dark .headline { color: #f5f0e6; }
+  .headline .accent { color: #d97757; }
+  .sub {
+    position: absolute; top: 400px; left: 0; width: 100%; text-align: center;
+    font-size: 30px; padding: 0 130px; box-sizing: border-box;
+  }
+  .bg-light .sub { color: #57544c; }
+  .bg-dark .sub { color: #c9c4b8; }
+  .frame {
+    position: absolute; top: 500px; left: 340px; width: 400px; height: 866px;
+    border-radius: 56px; overflow: hidden; background: #000;
+    box-shadow: 0 60px 120px -20px rgba(0,0,0,0.35), 0 0 0 12px #1c1c1c, 0 0 0 14px #3a3a3a;
+  }
+  .frame iframe { width: 400px; height: 866px; border: none; display: block; }
+  .notch {
+    position: absolute; top: 500px; left: 340px; width: 400px; height: 34px;
+    display: flex; justify-content: center; z-index: 5;
+  }
+  .notch::after { content: ''; width: 160px; height: 26px; background: #1c1c1c; border-radius: 0 0 18px 18px; }
+</style>
+</head>
+<body>
+  <div class="headline"></div>
+  <div class="sub"></div>
+  <div class="notch"></div>
+  <div class="frame"><iframe id="phone"></iframe></div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    const headline = params.get('headline') || 'Hounsfield HU';
+    const accent = params.get('accent') || '';
+    const sub = params.get('sub') || '';
+    const bg = params.get('bg') === 'dark' ? 'dark' : 'light';
+    const tab = params.get('tab') || 'studies';
+    const ready = params.get('ready') === '1';
+
+    document.body.className = 'bg-' + bg;
+    document.querySelector('.headline').innerHTML =
+      headline + (accent ? '<br><span class="accent">' + accent + '</span>' : '');
+    document.querySelector('.sub').textContent = sub;
+
+    const iframe = document.getElementById('phone');
+    iframe.src = location.origin + '/';
+
+    iframe.addEventListener('load', async () => {
+      try {
+        const doc = iframe.contentDocument;
+        for (let i = 0; i < 30 && !doc.querySelector('.tabbar'); i++) {
+          await new Promise((r) => setTimeout(r, 150));
+        }
+        if (tab === 'settings') {
+          [...doc.querySelectorAll('button')].find((b) => b.textContent.includes('SETTINGS'))?.click();
+        } else if (tab === 'capture') {
+          [...doc.querySelectorAll('button')].find((b) => b.textContent.includes('NEW STUDY'))?.click();
+        } else if (tab === 'study') {
+          for (let i = 0; i < 20 && !doc.querySelector('.study-row'); i++) {
+            await new Promise((r) => setTimeout(r, 150));
+          }
+          doc.querySelector('.study-row')?.click();
+        }
+        await new Promise((r) => setTimeout(r, 250));
+        if (ready) {
+          const chip = doc.querySelector('.model-chip');
+          if (chip) chip.innerHTML = '<span class="dot ready"></span>MedGemma · mlx';
+        }
+        document.title = 'tile-ready';
+      } catch (err) {
+        // Cross-origin (template opened from a different host than the
+        // app) — the iframe still renders the app, just without the
+        // scripted screen selection.
+        console.warn('Could not drive iframe (cross-origin?):', err);
+      }
+    });
+  </script>
+</body>
+</html>
