@@ -1,0 +1,9 @@
+{
+  "appId": "com.hounsfield.app",
+  "appName": "Hounsfield",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#faf9f5"
+  }
+}
