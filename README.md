@@ -5,7 +5,7 @@ entirely on your own device — as a **native iOS app** (Capacitor), an installa
 browser. No server, no accounts, no data leaving the device. After the one-time model download,
 the app works with **zero network connectivity**.
 
-**Design:** Claude design language — warm ivory/off-white paper surfaces with a terracotta
+**Design:** Warm ivory/off-white paper surfaces with a terracotta
 accent by default; Light / Dark / System selectable in Settings (the film viewer stays black in
 both, as a reading room should).
 
