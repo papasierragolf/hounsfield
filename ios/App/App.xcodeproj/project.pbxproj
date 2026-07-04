@@ -19,6 +19,7 @@
 		A10000000000000000000002 /* MedGemmaMLXPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000001 /* MedGemmaMLXPlugin.swift */; };
 		A10000000000000000000004 /* HounsfieldViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000003 /* HounsfieldViewController.swift */; };
 		A10000000000000000000006 /* MLXHubBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000007 /* MLXHubBridge.swift */; };
+		A10000000000000000000051 /* BiometricVaultPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000050 /* BiometricVaultPlugin.swift */; };
 		A10000000000000000000021 /* MLXVLM in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000011 /* MLXVLM */; };
 		A10000000000000000000022 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000012 /* MLXLMCommon */; };
 		A10000000000000000000023 /* MLXHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000013 /* MLXHuggingFace */; };
@@ -42,6 +43,7 @@
 		A10000000000000000000003 /* HounsfieldViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HounsfieldViewController.swift; sourceTree = "<group>"; };
 		A10000000000000000000005 /* App.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = App.entitlements; sourceTree = "<group>"; };
 		A10000000000000000000007 /* MLXHubBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MLXHubBridge.swift; sourceTree = "<group>"; };
+		A10000000000000000000050 /* BiometricVaultPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricVaultPlugin.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -86,6 +88,7 @@
 				A10000000000000000000001 /* MedGemmaMLXPlugin.swift */,
 				A10000000000000000000003 /* HounsfieldViewController.swift */,
 				A10000000000000000000007 /* MLXHubBridge.swift */,
+				A10000000000000000000050 /* BiometricVaultPlugin.swift */,
 				A10000000000000000000005 /* App.entitlements */,
 				504EC30B1FED79650016851F /* Main.storyboard */,
 				504EC30E1FED79650016851F /* Assets.xcassets */,
@@ -192,6 +195,7 @@
 				A10000000000000000000002 /* MedGemmaMLXPlugin.swift in Sources */,
 				A10000000000000000000004 /* HounsfieldViewController.swift in Sources */,
 				A10000000000000000000006 /* MLXHubBridge.swift in Sources */,
+				A10000000000000000000051 /* BiometricVaultPlugin.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

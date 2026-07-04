@@ -5,5 +5,6 @@ import Capacitor
 class HounsfieldViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(MedGemmaMLXPlugin())
+        bridge?.registerPluginInstance(BiometricVaultPlugin())
     }
 }

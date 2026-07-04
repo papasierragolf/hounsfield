@@ -26,6 +26,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>Hounsfield uses the camera to photograph X-ray films and CT images for on-device interpretation. Photos never leave your device.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>Face ID unlocks your encrypted studies and reports stored on this device.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Hounsfield lets you pick existing X-ray or CT photos from your library. Images are processed only on this device.</string>
 	<key>UILaunchStoryboardName</key>

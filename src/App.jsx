@@ -4,7 +4,9 @@ import { blobToDataURL } from './lib/image.js';
 import { DEFAULT_MODEL_ID, resolveModelIdForPlatform } from './inference/engine.js';
 import { isNative } from './lib/platform.js';
 import { useEngine } from './hooks/useEngine.js';
+import { useVault } from './hooks/useVault.js';
 import DisclaimerGate from './components/DisclaimerGate.jsx';
+import LockScreen from './components/LockScreen.jsx';
 import StudyList from './components/StudyList.jsx';
 import CaptureView from './components/CaptureView.jsx';
 import StudyDetail from './components/StudyDetail.jsx';
@@ -41,6 +43,7 @@ function TabIcon({ d }) {
 
 export default function App() {
   const engine = useEngine();
+  const vault = useVault();
   const [accepted, setAccepted] = useState(null); // null = loading
   const [tab, setTab] = useState('studies');
   const [studies, setStudies] = useState([]);
@@ -64,28 +67,39 @@ export default function App() {
     setThumbs(Object.fromEntries(entries.filter(Boolean)));
   }, []);
 
-  // Boot: read persisted settings, load studies, auto-load model if it was
-  // loaded before (weights come from cache, so this is instant-ish offline).
+  // Boot: read persisted settings (all plaintext, safe to read before the
+  // vault unlocks) and kick off the biometric-vault check in parallel.
   useEffect(() => {
     (async () => {
-      const [ack, savedModel, everLoaded, savedTheme, savedToken] = await Promise.all([
+      const [ack, savedModel, savedTheme, savedToken] = await Promise.all([
         getSetting('disclaimerAccepted', false),
         getSetting('modelId', DEFAULT_MODEL_ID),
-        getSetting('modelEverLoaded', false),
         getSetting('theme', 'light'),
         getSetting('hfToken', ''),
       ]);
-      const resolvedModel = resolveModelIdForPlatform(savedModel);
       setAccepted(ack);
-      setModelId(resolvedModel);
+      setModelId(resolveModelIdForPlatform(savedModel));
       setTheme(savedTheme);
       setHfToken(savedToken);
+      await vault.init();
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Once the vault is unlocked (or was never enabled), it's safe to read
+  // studies/images and auto-load the model. Runs once per unlock.
+  useEffect(() => {
+    if (accepted !== true) return;
+    if (vault.state !== 'unlocked' && vault.state !== 'disabled') return;
+    (async () => {
+      const everLoaded = await getSetting('modelEverLoaded', false);
       await refreshStudies();
       // Native app ships with the model in the bundle — load it on every
       // launch. On the web, only auto-load once a download has succeeded.
-      if (ack && (everLoaded || isNative())) engine.load(resolvedModel, { hfToken: savedToken });
+      if (everLoaded || isNative()) engine.load(modelId, { hfToken });
     })();
-  }, [engine, refreshStudies]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accepted, vault.state]);
 
   // Remember that a load succeeded so future launches restore automatically.
   useEffect(() => {
@@ -102,7 +116,7 @@ export default function App() {
     return () => mq.removeEventListener('change', onChange);
   }, [theme]);
 
-  if (accepted === null) return null;
+  if (accepted === null || vault.state === 'checking') return null;
   if (!accepted) {
     return (
       <DisclaimerGate
@@ -112,6 +126,9 @@ export default function App() {
         }}
       />
     );
+  }
+  if (vault.state === 'locked' || vault.state === 'unsupported') {
+    return <LockScreen vault={vault} />;
   }
 
   const handleModelIdChange = (id) => {

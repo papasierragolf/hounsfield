@@ -1,16 +1,43 @@
 import { useRef, useState } from 'react';
 import { useEngine } from '../hooks/useEngine.js';
+import { useVault } from '../hooks/useVault.js';
 import { MODEL_PRESETS, normalizeModelId } from '../inference/engine.js';
 import { exportBackup, restoreBackup } from '../lib/backup.js';
 import { isNative } from '../lib/platform.js';
 
+const BIOMETRY_LABEL = { faceID: 'Face ID', touchID: 'Touch ID', platform: 'biometric unlock' };
+
 export default function SettingsView({ modelId, onModelIdChange, onRestored, theme, onThemeChange, hfToken, onHfTokenChange }) {
   const engine = useEngine();
+  const vault = useVault();
   const restoreRef = useRef(null);
   const [customId, setCustomId] = useState('');
   const [customWarning, setCustomWarning] = useState(null);
   const [backupMsg, setBackupMsg] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [vaultBusy, setVaultBusy] = useState(false);
+  const [vaultMsg, setVaultMsg] = useState(null);
+
+  const biometryLabel = BIOMETRY_LABEL[vault.biometryType] || 'biometric unlock';
+  const vaultOn = vault.state === 'unlocked' || vault.state === 'locked' || vault.state === 'unsupported';
+
+  async function handleVaultToggle() {
+    setVaultBusy(true);
+    setVaultMsg(null);
+    try {
+      if (vaultOn) {
+        await vault.disable();
+        setVaultMsg('Biometric lock disabled. Your data has been decrypted back to normal storage.');
+      } else {
+        await vault.enable();
+        setVaultMsg(`Biometric lock enabled with ${biometryLabel}. Existing studies were encrypted.`);
+      }
+    } catch (err) {
+      setVaultMsg(String(err.message || err));
+    } finally {
+      setVaultBusy(false);
+    }
+  }
 
   const pct = Math.round(engine.overallProgress() * 100);
   const files = Object.values(engine.progress);
@@ -67,6 +94,44 @@ export default function SettingsView({ modelId, onModelIdChange, onRestored, the
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="card">
+        <h2>Security</h2>
+        {vault.biometryType === 'none' && vault.state !== 'unsupported' ? (
+          <p className="hint">No biometric authentication is available on this device.</p>
+        ) : (
+          <>
+            <p className="hint" style={{ marginBottom: 12 }}>
+              {vaultOn
+                ? `Studies and reports are encrypted at rest and require ${biometryLabel} to open the app.`
+                : `Require ${biometryLabel} to open the app, and encrypt all studies, images, and reports on this device.`}
+            </p>
+            {vault.state === 'unsupported' && (
+              <div className="notice" style={{ marginBottom: 12 }}>
+                Biometric lock was enabled, but {biometryLabel} is no longer available on this
+                device. Your data stays encrypted until it's available again.
+              </div>
+            )}
+            <button className="btn btn-primary" disabled={vaultBusy} onClick={handleVaultToggle}>
+              {vaultBusy
+                ? 'Working…'
+                : vaultOn
+                  ? `Disable ${biometryLabel} lock`
+                  : `Enable ${biometryLabel} lock`}
+            </button>
+            {vault.state === 'unlocked' && (
+              <button
+                className="btn btn-secondary"
+                style={{ marginLeft: 8 }}
+                onClick={() => vault.lock()}
+              >
+                Lock now
+              </button>
+            )}
+            {vaultMsg && <p className="hint" style={{ marginTop: 10 }}>{vaultMsg}</p>}
+          </>
+        )}
       </div>
 
       <div className="card">
@@ -299,6 +364,12 @@ export default function SettingsView({ modelId, onModelIdChange, onRestored, the
           Your data never leaves this device automatically. Export a single backup file and store
           it wherever you choose — iCloud Drive, Google Drive, or local files.
         </p>
+        {vaultOn && (
+          <div className="notice" style={{ marginBottom: 12 }}>
+            The exported backup file itself is <strong>not</strong> encrypted, even with
+            biometric lock enabled — store it somewhere you trust.
+          </div>
+        )}
         <div className="btn-row">
           <button className="btn btn-secondary" disabled={busy} onClick={handleExport}>
             Export backup
