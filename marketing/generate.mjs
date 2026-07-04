@@ -287,20 +287,34 @@ const TILES = [
   },
 ];
 
+// Output sizes for the composed store/ tiles. The template
+// (public/marketing/store-tile.html) is laid out entirely in vw/vh units,
+// so it composes correctly at any of these aspect ratios without
+// stretching — add more sizes here as needed (e.g. other App Store device
+// classes) with no template changes required.
+const STORE_SIZES = [
+  { name: 'social', width: 1080, height: 1920 },
+  { name: 'appstore-6.9in', width: 1290, height: 2796 },
+];
+
 async function shootStoreTiles(browser) {
-  const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
-  // Seed once more so the tile screenshots (which reload the app fresh
-  // inside the template's iframe) have data to show.
-  await seedDemoData(page);
-  for (const tile of TILES) {
-    const qs = new URLSearchParams(tile.params).toString();
-    await page.goto(`${APP_URL}/marketing/store-tile.html?${qs}`);
-    await page.waitForFunction(() => document.title === 'tile-ready', { timeout: 15000 }).catch(() => {});
-    await page.waitForTimeout(400);
-    await page.screenshot({ path: path.join(STORE_DIR, tile.file) });
+  for (const size of STORE_SIZES) {
+    const outDir = path.join(STORE_DIR, size.name);
+    await mkdir(outDir, { recursive: true });
+    const page = await browser.newPage({ viewport: { width: size.width, height: size.height } });
+    // Seed once per size so the tile screenshots (which reload the app
+    // fresh inside the template's iframe) have data to show.
+    await seedDemoData(page);
+    for (const tile of TILES) {
+      const qs = new URLSearchParams(tile.params).toString();
+      await page.goto(`${APP_URL}/marketing/store-tile.html?${qs}`);
+      await page.waitForFunction(() => document.title === 'tile-ready', { timeout: 15000 }).catch(() => {});
+      await page.waitForTimeout(400);
+      await page.screenshot({ path: path.join(outDir, tile.file) });
+    }
+    await clearDemoData(page);
+    await page.close();
   }
-  await clearDemoData(page);
-  await page.close();
 }
 
 async function main() {
@@ -315,7 +329,7 @@ async function main() {
   } finally {
     await browser.close();
   }
-  console.log(`\nDone. Screenshots written to:\n  ${APP_DIR}\n  ${STORE_DIR}\n`);
+  console.log(`\nDone. Screenshots written to:\n  ${APP_DIR}\n  ${STORE_DIR} (per size subfolder)\n`);
 }
 
 main();

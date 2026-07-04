@@ -27,9 +27,22 @@
 <head>
 <meta charset="utf-8" />
 <style>
+  /*
+    All sizing below is viewport-relative (vw/vh) rather than fixed pixels,
+    so this same markup composes correctly at any canvas size Playwright
+    hands it — social tiles (1080x1920) and full App Store submission sizes
+    (e.g. 1290x2796 for 6.9" iPhones) alike — without stretching or
+    misaligning the phone frame. The phone frame itself keeps a fixed
+    aspect-ratio (iPhone-like 400:866) regardless of the outer canvas's
+    own aspect ratio.
+  */
   html, body {
-    margin: 0; padding: 0; width: 1080px; height: 1920px; overflow: hidden;
+    margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  body {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-sizing: border-box;
   }
   body.bg-light {
     background: linear-gradient(160deg, #faf9f5 0%, #f3ede2 55%, #f0dcc8 100%);
@@ -38,37 +51,39 @@
     background: linear-gradient(160deg, #2a2825 0%, #262624 55%, #1f1e1d 100%);
   }
   .headline {
-    position: absolute; top: 120px; left: 0; width: 100%; text-align: center;
-    font-family: Georgia, 'Times New Roman', serif; font-size: 64px; font-weight: 700;
-    line-height: 1.25; padding: 0 90px; box-sizing: border-box;
+    text-align: center; font-family: Georgia, 'Times New Roman', serif;
+    font-size: 4.6vw; font-weight: 700; line-height: 1.25; padding: 0 6vw;
+    box-sizing: border-box;
   }
   .bg-light .headline { color: #1f1e1d; }
   .bg-dark .headline { color: #f5f0e6; }
   .headline .accent { color: #d97757; }
   .sub {
-    position: absolute; top: 400px; left: 0; width: 100%; text-align: center;
-    font-size: 30px; padding: 0 130px; box-sizing: border-box;
+    margin-top: 2.2vh; text-align: center; font-size: 2.1vw; padding: 0 9vw;
+    box-sizing: border-box;
   }
   .bg-light .sub { color: #57544c; }
   .bg-dark .sub { color: #c9c4b8; }
   .frame {
-    position: absolute; top: 500px; left: 340px; width: 400px; height: 866px;
-    border-radius: 56px; overflow: hidden; background: #000;
-    box-shadow: 0 60px 120px -20px rgba(0,0,0,0.35), 0 0 0 12px #1c1c1c, 0 0 0 14px #3a3a3a;
+    position: relative; margin-top: 4.5vh; width: 34vw; aspect-ratio: 400 / 866;
+    border-radius: 6vw; overflow: hidden; background: #000;
+    box-shadow: 0 6vh 10vh -3vh rgba(0,0,0,0.35), 0 0 0 1.1vw #1c1c1c, 0 0 0 1.3vw #3a3a3a;
   }
-  .frame iframe { width: 400px; height: 866px; border: none; display: block; }
+  .frame iframe { width: 100%; height: 100%; border: none; display: block; }
   .notch {
-    position: absolute; top: 500px; left: 340px; width: 400px; height: 34px;
-    display: flex; justify-content: center; z-index: 5;
+    position: absolute; top: 0; left: 0; width: 100%; z-index: 5;
+    display: flex; justify-content: center;
   }
-  .notch::after { content: ''; width: 160px; height: 26px; background: #1c1c1c; border-radius: 0 0 18px 18px; }
+  .notch::after { content: ''; width: 40%; height: 3.2vh; background: #1c1c1c; border-radius: 0 0 1.4vw 1.4vw; }
 </style>
 </head>
 <body>
   <div class="headline"></div>
   <div class="sub"></div>
-  <div class="notch"></div>
-  <div class="frame"><iframe id="phone"></iframe></div>
+  <div class="frame">
+    <div class="notch"></div>
+    <iframe id="phone"></iframe>
+  </div>
 
   <script>
     const params = new URLSearchParams(location.search);

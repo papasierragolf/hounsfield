@@ -5,8 +5,9 @@ Screenshots used for the App Store listing and social posts (LinkedIn/Substack).
 ```
 marketing/
   screenshots/
-    app/     raw app screenshots — drop straight into a post or article
-    store/   composed device-framed tiles with headline copy, for App Store listing use
+    app/                     raw app screenshots — drop straight into a post or article
+    store/social/            composed device-framed tiles, 1080x1920 (LinkedIn/Substack)
+    store/appstore-6.9in/    same tiles, 1290x2796 (Apple's 6.9" iPhone App Store size)
   generate.mjs   regenerates everything above
 README.md        this file
 ```
@@ -39,11 +40,15 @@ node marketing/generate.mjs   # terminal 2
 
 `generate.mjs` seeds two synthetic demo studies (procedurally-drawn placeholder
 X-ray/CT graphics, sample report text) into IndexedDB, captures the raw app
-screenshots and the three store tiles as real PNGs, then clears the demo data back
-out — your own studies are never touched (a separate Chrome profile is used).
+screenshots and the three store tiles — at every size in `STORE_SIZES` — as real
+PNGs, then clears the demo data back out — your own studies are never touched (a
+separate Chrome profile is used).
 
-To add a new tile, add an entry to the `TILES` array at the bottom of `generate.mjs`
-with new `headline`/`accent`/`sub`/`bg`/`tab` params — no HTML changes needed.
+The template is laid out entirely in `vw`/`vh` units, so it composes correctly at
+any canvas aspect ratio without stretching. To add a new output size (e.g. another
+Apple device class), add an entry to the `STORE_SIZES` array — no template changes
+needed. To add a new tile, add an entry to the `TILES` array with new
+`headline`/`accent`/`sub`/`bg`/`tab` params.
 
 Uses `playwright-core` (devDependency) driving your system's installed Google Chrome
 via the `channel: 'chrome'` option — no extra browser binary download.
