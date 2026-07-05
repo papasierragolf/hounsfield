@@ -260,41 +260,76 @@ async function shootRawScreenshots(browser) {
   await page.close();
 }
 
+// Seven feature tiles matching Apple's recommended App Store showcase format:
+// phone frame dominant (top 76%), short caption strip below.
+// 'scroll' is a 0.0–1.0 fraction of .app-main scrollHeight applied after
+// the screen loads, so we can land on the Impression section etc.
 const TILES = [
   {
-    file: 'tile-1-on-device.png',
+    file: 'tile-1-offline.png',
     params: {
-      headline: 'Radiology AI.', accent: 'Fully on your device.',
-      sub: 'MedGemma 1.5 4B runs locally via Apple MLX — no cloud, no network required after setup.',
+      headline: '100% Offline AI — No cloud. No uploads.',
+      sub: 'Your images stay on your device. Works in airplane mode after one-time setup.',
       bg: 'light', tab: 'studies', ready: '1',
     },
   },
   {
-    file: 'tile-2-reports.png',
+    file: 'tile-2-mlx.png',
     params: {
-      headline: 'Structured reports.', accent: 'In seconds.',
-      sub: 'Technique, Findings, Impression, and Recommendations — generated on-device, streamed live.',
+      headline: 'Runs MedGemma on iPhone — Apple MLX acceleration.',
+      sub: "Google's medically-tuned vision model running natively on the device GPU.",
       bg: 'light', tab: 'study', ready: '1',
     },
   },
   {
-    file: 'tile-3-security.png',
+    file: 'tile-3-confidence.png',
     params: {
-      headline: 'Face ID protected.', accent: 'Encrypted at rest.',
-      sub: 'Every study, image, and report is AES-encrypted on-device — unlocked only by you.',
-      bg: 'dark', tab: 'settings', ready: '1',
+      headline: 'Confidence Estimates — Every finding flagged.',
+      sub: 'The model rates its own certainty on each reported finding — high, moderate, or low.',
+      bg: 'light', tab: 'study', scroll: '0.58', ready: '1',
+    },
+  },
+  {
+    file: 'tile-4-control.png',
+    params: {
+      headline: 'Complete Control — Stop. Refine. Retry.',
+      sub: 'Cancel inference mid-stream, edit patient context, and re-analyse with a single tap.',
+      bg: 'light', tab: 'study', scroll: '0.1', ready: '1',
+    },
+  },
+  {
+    file: 'tile-5-memory.png',
+    params: {
+      headline: 'Memory Aware — Load and unload on demand.',
+      sub: 'Free GPU memory instantly. Reload for a guaranteed clean context before the next study.',
+      bg: 'light', tab: 'settings', scroll: '0.42', ready: '1',
+    },
+  },
+  {
+    file: 'tile-6-darkmode.png',
+    params: {
+      headline: 'Native iOS Experience — Light & Dark Mode.',
+      sub: 'Designed for the reading room. The film viewer stays black in both themes.',
+      bg: 'dark', tab: 'study', theme: 'dark', ready: '1',
+    },
+  },
+  {
+    file: 'tile-7-privacy.png',
+    params: {
+      headline: 'Privacy First — Face ID. Encrypted. No accounts.',
+      sub: 'AES-GCM encryption at rest, biometric lock, zero mandatory network traffic.',
+      bg: 'dark', tab: 'settings', theme: 'light', ready: '1',
     },
   },
 ];
 
-// Output sizes for the composed store/ tiles. The template
-// (public/marketing/store-tile.html) is laid out entirely in vw/vh units,
-// so it composes correctly at any of these aspect ratios without
-// stretching — add more sizes here as needed (e.g. other App Store device
-// classes) with no template changes required.
+// Apple-specified App Store screenshot dimensions (portrait, 1× pixel density).
+// The template uses vw/vh layout so it adapts to any size here without
+// stretching. Add further device classes by appending to this array.
 const STORE_SIZES = [
-  { name: 'social', width: 1080, height: 1920 },
-  { name: 'appstore-6.9in', width: 1290, height: 2796 },
+  { name: 'social',          width: 1080, height: 1920 },  // LinkedIn / Substack
+  { name: 'appstore-6.5in', width: 1242, height: 2688 },  // iPhone XS Max → 14 Plus
+  { name: 'appstore-6.9in', width: 1320, height: 2868 },  // iPhone 15 Pro Max → 16 Pro Max
 ];
 
 async function shootStoreTiles(browser) {

@@ -1,134 +1,185 @@
 <!DOCTYPE html>
 <!--
-  Reusable App Store / social marketing tile template for Hounsfield.
-
-  Served by the same Vite dev server as the app itself (place under
-  public/, so it's reachable at /marketing/store-tile.html) — this matters
-  because the embedded <iframe> below points at the running app on the
-  SAME origin, which lets this page's script reach into the iframe
-  (iframe.contentDocument) to drive it into a specific screen/theme before
-  the screenshot is taken. Cross-origin, that scripting would be blocked
-  by the browser and the iframe would just show whatever the app's
-  default landing screen is.
-
-  Usage: open with query params, e.g.
-    /marketing/store-tile.html?headline=Radiology+AI.&accent=Fully+on+your+device.
-      &sub=MedGemma+1.5+4B+runs+locally+via+Apple+MLX.&bg=light&tab=studies
+  App Store / social marketing tile template for Hounsfield.
+  Served from public/ so same-origin iframe scripting works.
 
   Params:
-    headline   plain first line (required)
-    accent     colored second line (optional)
-    sub        subhead paragraph (optional)
-    bg         'light' | 'dark'  — background of the marketing canvas (default light)
-    tab        'studies' | 'settings' | 'study' | 'capture' — which app screen to show
-    ready      '1' to cosmetically show "MedGemma · mlx" as loaded (default off)
+    headline   top caption line — split on ' — ' for accent colour
+    sub        smaller caption line below
+    bg         'light' | 'dark'
+    tab        'studies' | 'study' | 'settings' | 'capture'
+    theme      'light' | 'dark' — in-app theme (defaults to bg value)
+    scroll     0.0–1.0 fraction of .app-main scrollHeight
+    ready      '1' — cosmetically patch model chip to "MedGemma · mlx"
 -->
 <html>
 <head>
 <meta charset="utf-8" />
 <style>
-  /*
-    All sizing below is viewport-relative (vw/vh) rather than fixed pixels,
-    so this same markup composes correctly at any canvas size Playwright
-    hands it — social tiles (1080x1920) and full App Store submission sizes
-    (e.g. 1290x2796 for 6.9" iPhones) alike — without stretching or
-    misaligning the phone frame. The phone frame itself keeps a fixed
-    aspect-ratio (iPhone-like 400:866) regardless of the outer canvas's
-    own aspect ratio.
-  */
-  html, body {
-    margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { width: 100vw; height: 100vh; }
+
   body {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    box-sizing: border-box;
+    width: 100vw; height: 100vh; overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    position: relative;
   }
-  body.bg-light {
-    background: linear-gradient(160deg, #faf9f5 0%, #f3ede2 55%, #f0dcc8 100%);
+  body.bg-light { background: linear-gradient(170deg,#faf9f5 0%,#ede3d2 100%); }
+  body.bg-dark  { background: linear-gradient(170deg,#222120 0%,#181716 100%); }
+
+  /* ── phone region: top 76% ── */
+  .phone-region {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 24%;
+    display: flex; align-items: center; justify-content: center;
   }
-  body.bg-dark {
-    background: linear-gradient(160deg, #2a2825 0%, #262624 55%, #1f1e1d 100%);
-  }
-  .headline {
-    text-align: center; font-family: Georgia, 'Times New Roman', serif;
-    font-size: 4.6vw; font-weight: 700; line-height: 1.25; padding: 0 6vw;
-    box-sizing: border-box;
-  }
-  .bg-light .headline { color: #1f1e1d; }
-  .bg-dark .headline { color: #f5f0e6; }
-  .headline .accent { color: #d97757; }
-  .sub {
-    margin-top: 2.2vh; text-align: center; font-size: 2.1vw; padding: 0 9vw;
-    box-sizing: border-box;
-  }
-  .bg-light .sub { color: #57544c; }
-  .bg-dark .sub { color: #c9c4b8; }
+
   .frame {
-    position: relative; margin-top: 4.5vh; width: 34vw; aspect-ratio: 400 / 866;
-    border-radius: 6vw; overflow: hidden; background: #000;
-    box-shadow: 0 6vh 10vh -3vh rgba(0,0,0,0.35), 0 0 0 1.1vw #1c1c1c, 0 0 0 1.3vw #3a3a3a;
+    /* height = 70% of viewport; width auto-constrained by 393:852 ratio */
+    height: 70%;
+    aspect-ratio: 393 / 852;
+    border-radius: 5.5vw; overflow: hidden; background: #000;
+    position: relative;
+    box-shadow:
+      0 0 0 1.1vw #1c1c1c,
+      0 0 0 1.35vw #404040,
+      0 5vh 14vh -3vh rgba(0,0,0,0.5);
   }
   .frame iframe { width: 100%; height: 100%; border: none; display: block; }
+
+  /* Dynamic island */
   .notch {
-    position: absolute; top: 0; left: 0; width: 100%; z-index: 5;
-    display: flex; justify-content: center;
+    position: absolute; top: 0; left: 0; width: 100%; z-index: 10;
+    display: flex; justify-content: center; pointer-events: none;
   }
-  .notch::after { content: ''; width: 40%; height: 3.2vh; background: #1c1c1c; border-radius: 0 0 1.4vw 1.4vw; }
+  .notch::after {
+    content: '';
+    width: 30%; height: 3.8%;
+    background: #111; border-radius: 0 0 40% 40%;
+  }
+
+  /* ── caption strip: bottom 24% ── */
+  .caption {
+    position: absolute;
+    left: 0; right: 0; bottom: 0; height: 24%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 0 9%;
+  }
+  .caption::before {
+    content: '';
+    position: absolute; top: 0; left: 9%; right: 9%; height: 1px;
+    background: rgba(128,118,108,0.18);
+  }
+
+  .cap-headline {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(16px, 3.4vw, 56px);
+    font-weight: 700; line-height: 1.22; letter-spacing: -0.01em;
+  }
+  .accent { color: #d97757; }
+  .bg-light .cap-headline { color: #1a1917; }
+  .bg-dark  .cap-headline { color: #f0ece4; }
+
+  .cap-sub {
+    margin-top: 1.5%;
+    font-size: clamp(12px, 2.1vw, 32px);
+    line-height: 1.45;
+  }
+  .bg-light .cap-sub { color: #706b60; }
+  .bg-dark  .cap-sub { color: #b0ab9e; }
 </style>
 </head>
 <body>
-  <div class="headline"></div>
-  <div class="sub"></div>
-  <div class="frame">
-    <div class="notch"></div>
-    <iframe id="phone"></iframe>
+  <div class="phone-region">
+    <div class="frame">
+      <div class="notch"></div>
+      <iframe id="phone"></iframe>
+    </div>
+  </div>
+
+  <div class="caption">
+    <div class="cap-headline" id="headline"></div>
+    <div class="cap-sub"      id="sub"></div>
   </div>
 
   <script>
-    const params = new URLSearchParams(location.search);
-    const headline = params.get('headline') || 'Hounsfield HU';
-    const accent = params.get('accent') || '';
-    const sub = params.get('sub') || '';
-    const bg = params.get('bg') === 'dark' ? 'dark' : 'light';
-    const tab = params.get('tab') || 'studies';
-    const ready = params.get('ready') === '1';
+    const p      = new URLSearchParams(location.search);
+    const bg     = p.get('bg') === 'dark' ? 'dark' : 'light';
+    const tab    = p.get('tab')    || 'studies';
+    const theme  = p.get('theme') || bg;
+    const scroll = parseFloat(p.get('scroll') || '0');
+    const ready  = p.get('ready') === '1';
 
     document.body.className = 'bg-' + bg;
-    document.querySelector('.headline').innerHTML =
-      headline + (accent ? '<br><span class="accent">' + accent + '</span>' : '');
-    document.querySelector('.sub').textContent = sub;
+
+    // headline: 'Foo Bar — Accent part' → split at ' — '
+    const raw    = p.get('headline') || 'Hounsfield';
+    const dash   = raw.indexOf(' — ');
+    const hlEl   = document.getElementById('headline');
+    if (dash !== -1) {
+      hlEl.innerHTML = raw.slice(0, dash) +
+        ' <span class="accent">— ' + raw.slice(dash + 3) + '</span>';
+    } else {
+      hlEl.textContent = raw;
+    }
+    document.getElementById('sub').textContent = p.get('sub') || '';
 
     const iframe = document.getElementById('phone');
-    iframe.src = location.origin + '/';
+    iframe.src   = location.origin + '/';
 
     iframe.addEventListener('load', async () => {
       try {
         const doc = iframe.contentDocument;
-        for (let i = 0; i < 30 && !doc.querySelector('.tabbar'); i++) {
-          await new Promise((r) => setTimeout(r, 150));
+
+        // Wait for app shell
+        for (let i = 0; i < 40 && !doc.querySelector('.tabbar'); i++) {
+          await new Promise(r => setTimeout(r, 120));
         }
+
+        // Apply in-app theme via the segmented control
+        if (theme === 'dark') {
+          const segs = [...doc.querySelectorAll('.seg button')];
+          const darkBtn = segs.find(b => b.textContent.trim() === 'Dark');
+          if (darkBtn) darkBtn.click();
+          await new Promise(r => setTimeout(r, 150));
+        }
+
+        // Navigate to the right screen
         if (tab === 'settings') {
-          [...doc.querySelectorAll('button')].find((b) => b.textContent.includes('SETTINGS'))?.click();
+          [...doc.querySelectorAll('button')].find(b => b.textContent.includes('SETTINGS'))?.click();
         } else if (tab === 'capture') {
-          [...doc.querySelectorAll('button')].find((b) => b.textContent.includes('NEW STUDY'))?.click();
+          [...doc.querySelectorAll('button')].find(b => b.textContent.includes('NEW STUDY'))?.click();
         } else if (tab === 'study') {
           for (let i = 0; i < 20 && !doc.querySelector('.study-row'); i++) {
-            await new Promise((r) => setTimeout(r, 150));
+            await new Promise(r => setTimeout(r, 120));
           }
           doc.querySelector('.study-row')?.click();
         }
-        await new Promise((r) => setTimeout(r, 250));
+
+        await new Promise(r => setTimeout(r, 400));
+
+        // Scroll the app's scrollable area
+        if (scroll > 0) {
+          const main = doc.querySelector('.app-main');
+          if (main) {
+            main.scrollTop = main.scrollHeight * scroll;
+            await new Promise(r => setTimeout(r, 120));
+          }
+        }
+
+        // Patch model chip cosmetically
         if (ready) {
           const chip = doc.querySelector('.model-chip');
           if (chip) chip.innerHTML = '<span class="dot ready"></span>MedGemma · mlx';
         }
+
         document.title = 'tile-ready';
       } catch (err) {
-        // Cross-origin (template opened from a different host than the
-        // app) — the iframe still renders the app, just without the
-        // scripted screen selection.
-        console.warn('Could not drive iframe (cross-origin?):', err);
+        console.warn('iframe drive failed:', err);
+        document.title = 'tile-ready';
       }
     });
   </script>
