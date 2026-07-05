@@ -60,7 +60,7 @@ public class MedGemmaMLXPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         loading = true
         // Cap the Metal buffer cache so a 4B model fits alongside the WebView.
-        MLX.GPU.set(cacheLimit: 64 * 1024 * 1024)
+        MLX.Memory.cacheLimit = 64 * 1024 * 1024
 
         Task {
             do {
@@ -106,7 +106,7 @@ public class MedGemmaMLXPlugin: CAPPlugin, CAPBridgedPlugin {
         container = nil
         loadedModelId = nil
         // Flush the Metal GPU buffer cache so the memory is actually returned to the OS.
-        MLX.GPU.set(cacheLimit: 0)
+        MLX.Memory.cacheLimit = 0
         call.resolve(["unloaded": true])
     }
 
